@@ -1,0 +1,18 @@
+FROM node:20-alpine
+
+EXPOSE 9000
+
+ENV HTTP_PROXY ${HTTPS_PROXY}
+ENV HTTPS_PROXY ${HTTP_PROXY}
+ENV NODE_TLS_REJECT_UNAUTHORIZED 0
+
+WORKDIR /app
+
+COPY package*.json ./
+
+RUN npm i
+
+COPY . .
+
+ENTRYPOINT npm run start:dev
+
