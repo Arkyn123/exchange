@@ -3,9 +3,11 @@ import { SequelizeModule } from '@nestjs/sequelize';
 import { OrderModule } from './order/order.module';
 import { EthListenerService } from './eth-listener/eth-listener.service';
 import { EthListenerModule } from './eth-listener/eth-listener.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
+    ConfigModule.forRoot(),
     SequelizeModule.forRoot({
       dialect: 'postgres',
       host: 'db',
@@ -20,6 +22,6 @@ import { EthListenerModule } from './eth-listener/eth-listener.module';
     EthListenerModule,
   ],
   controllers: [],
-  providers: [ EthListenerService],
+  providers: [EthListenerService],
 })
 export class AppModule { }
