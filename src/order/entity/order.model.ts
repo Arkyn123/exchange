@@ -1,7 +1,7 @@
 import { Column, DataType, Model, Table } from 'sequelize-typescript';
 
 export interface IOrder {
-  transactionHash: string;
+  id: string;
   tokenA: string;
   tokenB: string;
   user: string;
@@ -18,7 +18,7 @@ export class Order extends Model<Order, IOrder> implements IOrder {
     primaryKey: true,
     unique: true
   })
-  transactionHash: string;
+  id: string;
 
   @Column({
     type: DataType.STRING(255),

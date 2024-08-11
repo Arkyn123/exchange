@@ -10,9 +10,9 @@ export class OrderController {
     @Query('tokenA') tokenA?: string,
     @Query('tokenB') tokenB?: string,
     @Query('user') user?: string,
-    @Query('active', ParseBoolPipe) active?: boolean,
+    @Query('active') active?: string,
   ) {
-    return this.orderService.getOrders(tokenA, tokenB, user, active);
+    return this.orderService.getOrders(tokenA, tokenB, user, active == 'true');
   }
 
   @Get('getMatchingOrders')

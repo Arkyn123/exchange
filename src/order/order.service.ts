@@ -24,7 +24,7 @@ export class OrderService {
         return await this.orderRepository.findAll({ where })
     }
 
-    getMatchingOrders(tokenA: string, tokenB: string, amountAParsed: number, amountBParsed: number) {
-        console.log(this.getMatchingOrders.name);
+    async getMatchingOrders(tokenA: string, tokenB: string, amountA: number, amountB: number) {
+        return await this.orderRepository.findAll({ where: { tokenA, tokenB, amountA, amountB, active: true } })
     }
 }

@@ -26,10 +26,9 @@ export class EthListenerService implements OnModuleInit {
         }).then(async events => {
 
             const orders = events.map(el => {
-                const { transactionHash } = (el as EventLog)
 
-                const { amountA, amountB, tokenA, tokenB, user, isMarket } = (el as EventLog).returnValues;
-                return { transactionHash, amountA, amountB, tokenA, tokenB, user, active: isMarket }
+                const { id, amountA, amountB, tokenA, tokenB, user, isMarket } = (el as EventLog).returnValues;
+                return { id, amountA, amountB, tokenA, tokenB, user, active: isMarket }
             }) as IOrder[]
 
             await this.orderService.upsertOrders(orders)
