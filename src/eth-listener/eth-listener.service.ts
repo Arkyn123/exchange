@@ -1,6 +1,6 @@
 import { BadRequestException, Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import { OrderService } from 'src/order/order.service';
-import Web3, { Contract, EthExecutionAPI, EventLog, SupportedProviders } from 'web3';
+import Web3, { Contract, EventLog } from 'web3';
 import axios from 'axios';
 import { IOrder } from 'src/order/entity/order.model';
 
@@ -19,7 +19,25 @@ export class EthListenerService implements OnModuleInit {
         const abi = await this.getAbi(process.env.CONTRACT)
 
         this.contract = new this.web3.eth.Contract<typeof abi>(abi, process.env.CONTRACT);
-        
+
+        await Promise.all([
+            this.updateOrders(),
+            this.subscribeToOrderCreated(),
+            this.subscribeToOrderCancelled(),
+            this.subscribeToOrderMatched()
+        ])
+    }
+
+    private async getAbi(adress: string) {
+        const url = `https://api-sepolia.etherscan.io/api?module=contract&action=getabi&address=${adress}&apikey=${process.env.ETHSCAN_KEY}`
+        const res = await axios.get(url)
+        if (res.data.message !== 'OK')
+            throw new BadRequestException('Ошибка при получении abi ' + adress)
+
+        return JSON.parse(res.data.result)
+    }
+
+    private async updateOrders() {
         await this.contract.getPastEvents('OrderCreated', {
             fromBlock: 0,
             toBlock: 'latest'
@@ -35,16 +53,35 @@ export class EthListenerService implements OnModuleInit {
         }).catch(error => {
             console.error(error.message);
         });
-
     }
 
-    private async getAbi(adress: string) {
-        const url = `https://api-sepolia.etherscan.io/api?module=contract&action=getabi&address=${adress}&apikey=${process.env.ETHSCAN_KEY}`
-        const res = await axios.get(url)
-        if (res.data.message !== 'OK')
-            throw new BadRequestException('Ошибка при получении abi ' + adress)
-
-        return JSON.parse(res.data.result)
+    private async subscribeToOrderCreated() {
+        const orderCreated = this.contract.events.OrderCreated()
+        orderCreated.on('connected', () => console.log('Successful subscription to order creation'));
+        orderCreated.on('error', (error) => console.error('Error while creating order: ' + error.message));
+        orderCreated.on('data', async (data) => {
+            const { id, amountA, amountB, tokenA, tokenB, user, isMarket } = (data as EventLog).returnValues;
+            await this.orderService.upsertOrder({ id, amountA, amountB, tokenA, tokenB, user, active: isMarket } as IOrder);
+        });
     }
 
+    private async subscribeToOrderCancelled() {
+        const orderCancelled = this.contract.events.OrderCancelled()
+        orderCancelled.on('connected', () => console.log('Successful subscription to cancel an order'));
+        orderCancelled.on('error', (error) => console.error('Error while order cancelling: ' + error.message));
+        orderCancelled.on('data', async (data) => {
+            const { id, isMarket } = (data as EventLog).returnValues;
+            await this.orderService.upsertOrder({ id, active: isMarket } as IOrder);
+        });
+    }
+
+    private async subscribeToOrderMatched() {
+        const orderMatched = this.contract.events.OrderMatched()
+        orderMatched.on('connected', () => console.log('Successful subscription to order matches'));
+        orderMatched.on('error', (error) => console.error('Error while order matching: ' + error.message));
+        orderMatched.on('data', async (data) => {
+            const { id } = (data as EventLog).returnValues;
+            await this.orderService.upsertOrder({ id, active: false } as IOrder);
+        })
+    }
 }

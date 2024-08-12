@@ -14,12 +14,16 @@ export class OrderService {
         return await Promise.all(orders.map(el => this.orderRepository.upsert(el)))
     }
 
+    async upsertOrder(order: IOrder) {
+        return await this.orderRepository.upsert(order)
+    }
+
     async getOrders(tokenA: string, tokenB: string, user: string, active: boolean) {
         const where: WhereOptions<Order> = {}
         tokenA ? where.tokenA = tokenA : null
         tokenB ? where.tokenB = tokenB : null
         user ? where.user = user : null
-        active !== undefined ? where.active = active : null
+        where.active = active
 
         return await this.orderRepository.findAll({ where })
     }
