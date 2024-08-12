@@ -19,7 +19,7 @@ export class EthListenerService implements OnModuleInit {
         const abi = await this.getAbi(process.env.CONTRACT)
 
         this.contract = new this.web3.eth.Contract<typeof abi>(abi, process.env.CONTRACT);
-
+        
         await this.contract.getPastEvents('OrderCreated', {
             fromBlock: 0,
             toBlock: 'latest'

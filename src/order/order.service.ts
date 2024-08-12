@@ -19,7 +19,7 @@ export class OrderService {
         tokenA ? where.tokenA = tokenA : null
         tokenB ? where.tokenB = tokenB : null
         user ? where.user = user : null
-        active ? where.active = active : null
+        active !== undefined ? where.active = active : null
 
         return await this.orderRepository.findAll({ where })
     }
