@@ -5,8 +5,8 @@ export interface IOrder {
   tokenA: string;
   tokenB: string;
   user: string;
-  amountA: string;
-  amountB: string;
+  amountA: number;
+  amountB: number;
   active: boolean;
 }
 
@@ -42,13 +42,13 @@ export class Order extends Model<Order, IOrder> implements IOrder {
     type: DataType.DECIMAL(78, 0),
     allowNull: false,
   })
-  amountA: string;
+  amountA: number;
 
   @Column({
     type: DataType.DECIMAL(78, 0),
     allowNull: false,
   })
-  amountB: string;
+  amountB: number;
 
   @Column({
     type: DataType.BOOLEAN,
