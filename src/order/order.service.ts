@@ -44,7 +44,7 @@ export class OrderService {
         amountA != 0 ? where.amountA = amountA : null
 
         const orders = await this.orderRepository.findAll({
-            where: { tokenA, tokenB, amountB, active: true },
+            where: { ...where, tokenA, tokenB, amountB, active: true },
             attributes: ['id']
         })
         return orders.map(el => el.id)
