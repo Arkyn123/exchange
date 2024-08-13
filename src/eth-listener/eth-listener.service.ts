@@ -70,8 +70,8 @@ export class EthListenerService implements OnModuleInit {
         orderCancelled.on('connected', () => console.log('Successful subscription to cancel an order'));
         orderCancelled.on('error', (error) => console.error('Error while order cancelling: ' + error.message));
         orderCancelled.on('data', async (data) => {
-            const { id, isMarket } = (data as EventLog).returnValues;
-            await this.orderService.changActive(id as string, !!isMarket);
+            const { id } = (data as EventLog).returnValues;
+            await this.orderService.closeOrder(id as string);
         });
     }
 
@@ -80,9 +80,8 @@ export class EthListenerService implements OnModuleInit {
         orderMatched.on('connected', () => console.log('Successful subscription to order matches'));
         orderMatched.on('error', (error) => console.error('Error while order matching: ' + error.message));
         orderMatched.on('data', async (data) => {
-            const { id, amountReceived, amountLeftToFill } = (data as EventLog).returnValues;
-            if (amountReceived == amountLeftToFill)
-                await this.orderService.changActive(id as string, false);
+            const { id, amountLeftToFill } = (data as EventLog).returnValues;
+            await this.orderService.matchOrder(id as string, amountLeftToFill as number);
         })
     }
 }

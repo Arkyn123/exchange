@@ -18,10 +18,15 @@ export class OrderService {
         return await this.orderRepository.upsert(order)
     }
 
-    async changActive(id: string, active: boolean) {
-        const order = await this.orderRepository.findByPk(id)
-        if (!order) throw new NotFoundException('Ордер не найден!')
-        return await order.update({ active })
+    async closeOrder(id: string) {
+        const order = await this.findOrder(id)
+        return await order.update({ active: false })
+    }
+
+    async matchOrder(id: string, amountLeftToFill: number) {
+        const order = await this.findOrder(id)
+        if (order.amountB == amountLeftToFill)
+            return await this.closeOrder(id)
     }
 
     async getOrders(tokenA: string, tokenB: string, user: string, active: boolean) {
@@ -43,5 +48,11 @@ export class OrderService {
             attributes: ['id']
         })
         return orders.map(el => el.id)
+    }
+
+    private async findOrder(id: string) {
+        const order = await this.orderRepository.findByPk(id.toString())
+        if (!order) throw new NotFoundException('Ордер не найден!')
+        return order
     }
 }
