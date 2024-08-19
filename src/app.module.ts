@@ -21,7 +21,5 @@ import { ConfigModule } from '@nestjs/config';
     OrderModule,
     EthListenerModule,
   ],
-  controllers: [],
-  providers: [EthListenerService],
 })
 export class AppModule { }
